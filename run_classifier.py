@@ -448,14 +448,14 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
 
 
   name_to_features = {
-      "input_ids": tf.FixedLenFeature([seq_length], tf.int64),
-      "input_mask": tf.FixedLenFeature([seq_length], tf.float32),
-      "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
-      "label_ids": tf.FixedLenFeature([], tf.int64),
-      "is_real_example": tf.FixedLenFeature([], tf.int64),
+      "input_ids": tf.compat.v1.FixedLenFeature([seq_length], tf.int64),
+      "input_mask": tf.compat.v1.FixedLenFeature([seq_length], tf.float32),
+      "segment_ids": tf.compat.v1.FixedLenFeature([seq_length], tf.int64),
+      "label_ids": tf.compat.v1.FixedLenFeature([], tf.int64),
+      "is_real_example": tf.compat.v1.FixedLenFeature([], tf.int64),
   }
   if FLAGS.is_regression:
-    name_to_features["label_ids"] = tf.FixedLenFeature([], tf.float32)
+    name_to_features["label_ids"] = tf.compat.v1.FixedLenFeature([], tf.float32)
 
   tf.compat.v1.logging.info("Input tfrecord file {}".format(input_file))
 
