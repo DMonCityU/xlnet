@@ -12,8 +12,8 @@ from six.moves import zip
 
 from absl import flags
 
-import tensorflow as tf2
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
+#import tensorflow.compat.v1 as tf
 
 def configure_tpu(FLAGS):
   if FLAGS.use_tpu:
@@ -35,12 +35,12 @@ def configure_tpu(FLAGS):
     strategy = None
     tf.logging.info('Single device mode.')
   else:
-    strategy = tf2.compat.v1.estimator.distribute.MirroredStrategy(
+    strategy = tf.compat.v1.estimator.distribute.MirroredStrategy(
         num_gpus=FLAGS.num_core_per_host)
     tf.logging.info('Use MirroredStrategy with %d devices.',
                     strategy.num_replicas_in_sync)
 
-  per_host_input = tf.estimator.tpu.InputPipelineConfig.PER_HOST_V2
+  per_host_input = tf.compat.v1.estimator.tpu.InputPipelineConfig.PER_HOST_V2
   run_config = tf.estimator.tpu.RunConfig(
       master=master,
       model_dir=FLAGS.model_dir,
