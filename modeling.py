@@ -25,7 +25,7 @@ def embedding_lookup(x, n_token, d_embed, initializer, use_tpu=True,
                      scope='embedding', reuse=None, dtype=tf.float32):
   """TPU and GPU embedding_lookup function."""
   with tf.compat.v1.variable_scope(scope, reuse=reuse):
-    lookup_table = tf.get_variable('lookup_table', [n_token, d_embed],
+    lookup_table = tf.compat.v1.get_variable('lookup_table', [n_token, d_embed],
                                    dtype=dtype, initializer=initializer)
     if use_tpu:
       one_hot_idx = tf.one_hot(x, n_token, dtype=dtype)
@@ -78,7 +78,7 @@ def positionwise_ffn(inp, d_model, d_inner, dropout, kernel_initializer,
 
 def head_projection(h, d_model, n_head, d_head, kernel_initializer, name):
   """Project hidden states to a specific head with a 4D-shape."""
-  proj_weight = tf.get_variable('{}/kernel'.format(name),
+  proj_weight = tf.compat.v1.get_variable('{}/kernel'.format(name),
                                 [d_model, n_head, d_head], dtype=h.dtype,
                                 initializer=kernel_initializer)
   head = tf.einsum('ibh,hnd->ibnd', h, proj_weight)
@@ -90,7 +90,7 @@ def post_attention(h, attn_vec, d_model, n_head, d_head, dropout, is_training,
                    kernel_initializer, residual=True):
   """Post-attention processing."""
   # post-attention projection (back to `d_model`)
-  proj_o = tf.get_variable('o/kernel', [d_model, n_head, d_head],
+  proj_o = tf.compat.v1.get_variable('o/kernel', [d_model, n_head, d_head],
                            dtype=h.dtype, initializer=kernel_initializer)
   attn_out = tf.einsum('ibnd,hnd->ibh', attn_vec, proj_o)
 
@@ -456,14 +456,14 @@ def transformer_xl(inp_k, n_token, n_layer, d_model, n_head,
   new_mems = []
   with tf.compat.v1.variable_scope(scope):
     if untie_r:
-      r_w_bias = tf.get_variable('r_w_bias', [n_layer, n_head, d_head],
+      r_w_bias = tf.compat.v1.get_variable('r_w_bias', [n_layer, n_head, d_head],
                                  dtype=tf_float, initializer=initializer)
-      r_r_bias = tf.get_variable('r_r_bias', [n_layer, n_head, d_head],
+      r_r_bias = tf.compat.v1.get_variable('r_r_bias', [n_layer, n_head, d_head],
                                  dtype=tf_float, initializer=initializer)
     else:
-      r_w_bias = tf.get_variable('r_w_bias', [n_head, d_head],
+      r_w_bias = tf.compat.v1.get_variable('r_w_bias', [n_head, d_head],
                                  dtype=tf_float, initializer=initializer)
-      r_r_bias = tf.get_variable('r_r_bias', [n_head, d_head],
+      r_r_bias = tf.compat.v1.get_variable('r_r_bias', [n_head, d_head],
                                  dtype=tf_float, initializer=initializer)
 
     bsz = tf.shape(inp_k)[1]
@@ -525,7 +525,7 @@ def transformer_xl(inp_k, n_token, n_layer, d_model, n_head,
 
     if inp_q is not None:
       with tf.compat.v1.variable_scope('mask_emb'):
-        mask_emb = tf.get_variable('mask_emb', [1, 1, d_model], dtype=tf_float)
+        mask_emb = tf.compat.v1.get_variable('mask_emb', [1, 1, d_model], dtype=tf_float)
         if target_mapping is not None:
           word_emb_q = tf.tile(mask_emb, [tf.shape(target_mapping)[0], bsz, 1])
         else:
@@ -538,14 +538,14 @@ def transformer_xl(inp_k, n_token, n_layer, d_model, n_head,
     ##### Segment embedding
     if seg_id is not None:
       if untie_r:
-        r_s_bias = tf.get_variable('r_s_bias', [n_layer, n_head, d_head],
+        r_s_bias = tf.compat.v1.get_variable('r_s_bias', [n_layer, n_head, d_head],
                                    dtype=tf_float, initializer=initializer)
       else:
         # default case (tie)
-        r_s_bias = tf.get_variable('r_s_bias', [n_head, d_head],
+        r_s_bias = tf.compat.v1.get_variable('r_s_bias', [n_head, d_head],
                                    dtype=tf_float, initializer=initializer)
 
-      seg_embed = tf.get_variable('seg_embed', [n_layer, 2, n_head, d_head],
+      seg_embed = tf.compat.v1.get_variable('seg_embed', [n_layer, 2, n_head, d_head],
                                   dtype=tf_float, initializer=initializer)
 
       # Convert `seg_id` to one-hot `seg_mat`
@@ -665,10 +665,10 @@ def lm_loss(hidden, target, n_token, d_model, initializer, lookup_table=None,
           'lookup_table cannot be None for tie_weight'
       softmax_w = lookup_table
     else:
-      softmax_w = tf.get_variable('weight', [n_token, d_model],
+      softmax_w = tf.compat.v1.get_variable('weight', [n_token, d_model],
                                   dtype=hidden.dtype, initializer=initializer)
 
-    softmax_b = tf.get_variable('bias', [n_token], dtype=hidden.dtype,
+    softmax_b = tf.compat.v1.get_variable('bias', [n_token], dtype=hidden.dtype,
                                 initializer=tf.zeros_initializer())
 
     logits = tf.einsum('ibd,nd->ibn', hidden, softmax_w) + softmax_b
@@ -705,7 +705,7 @@ def summarize_sequence(summary_type, hidden, d_model, n_head, d_head, dropout,
     elif summary_type == 'attn':
       bsz = tf.shape(hidden)[1]
 
-      summary_bias = tf.get_variable('summary_bias', [d_model],
+      summary_bias = tf.compat.v1.get_variable('summary_bias', [d_model],
                                      dtype=hidden.dtype,
                                      initializer=initializer)
       summary_bias = tf.tile(summary_bias[None, None], [1, bsz, 1])
