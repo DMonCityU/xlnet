@@ -96,7 +96,10 @@ def post_attention(h, attn_vec, d_model, n_head, d_head, dropout, is_training,
 
   attn_out = tf.compat.v1.layers.dropout(attn_out, dropout, training=is_training)
   if residual:
-    output = tf.keras.layers.LayerNormalization(attn_out + h, axis = -1)
+    # Testing without the possible multiple arguments. May need to use keras concatenate for attn_out + h
+    # This WILL NOT TRAIN PROPERLY as is.
+    output = tf.keras.layers.LayerNormalization(attn_out, axis = -1)
+    # output = tf.keras.layers.LayerNormalization(attn_out + h, axis = -1)
     #output = tf.compat.v1.layers.layer_norm(attn_out + h, begin_norm_axis=-1,
     #                                      scope='LayerNorm')
   else:
@@ -697,7 +700,7 @@ def summarize_sequence(summary_type, hidden, d_model, n_head, d_head, dropout,
       Otherwise, one should specify a different `scope` for each task.
   """
 
-  with tf.compat.v1.variable_scope(scope, 'sequnece_summary', reuse=reuse):
+  with tf.compat.v1.variable_scope(scope, 'sequence_summary', reuse=reuse):
     if summary_type == 'last':
       summary = hidden[-1]
     elif summary_type == 'first':
