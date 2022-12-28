@@ -98,8 +98,8 @@ def post_attention(h, attn_vec, d_model, n_head, d_head, dropout, is_training,
   if residual:
     # Testing without the possible multiple arguments. May need to use keras concatenate for attn_out + h
     # This WILL NOT TRAIN PROPERLY as is.
-    input("attn_out is: " + str(type(attn_out)))
-    input("h is : " + str(type(h)))
+    input("attn_out is: " + str(type(attn_out)) + " of shape " + str(attn_out.shape))
+    input("h is : " + str(type(h)) + " of shape " + str(attn_out.shape))
     output = tf.keras.layers.LayerNormalization(attn_out, axis = -1)
     input("It worked!")
     # output = tf.keras.layers.LayerNormalization(attn_out + h, axis = -1)
