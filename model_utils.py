@@ -40,8 +40,8 @@ def configure_tpu(FLAGS):
     tf.logging.info('Use MirroredStrategy with %d devices.',
                     strategy.num_replicas_in_sync)
 
-  per_host_input = tf2.compat.v1.estimator.tpu.InputPipelineConfig.PER_HOST_V2
-  run_config = tf2.compat.v1.estimator.tpu.RunConfig(
+  per_host_input = tf.estimator.tpu.InputPipelineConfig.PER_HOST_V2
+  run_config = tf.estimator.tpu.RunConfig(
       master=master,
       model_dir=FLAGS.model_dir,
       session_config=session_config,
