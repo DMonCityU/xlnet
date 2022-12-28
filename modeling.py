@@ -71,7 +71,7 @@ def positionwise_ffn(inp, d_model, d_inner, dropout, kernel_initializer,
                              name='layer_2')
     output = tf.compat.v1.layers.dropout(output, dropout, training=is_training,
                                name='drop_2')
-    output = tf.compat.v1.estimator.layers.layer_norm(output + inp, begin_norm_axis=-1,
+    output = tf.compat.v1.layers.layer_norm(output + inp, begin_norm_axis=-1,
                                           scope='LayerNorm')
   return output
 
