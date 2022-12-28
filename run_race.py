@@ -20,7 +20,8 @@ from sklearn.metrics import matthews_corrcoef, f1_score
 
 import absl.logging as _logging  # pylint: disable=unused-import
 
-import tensorflow as tf
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import sentencepiece as spm
 
 from data_utils import SEP_ID, VOCAB_SIZE, CLS_ID
