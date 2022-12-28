@@ -24,7 +24,7 @@ def configure_tpu(FLAGS):
     tpu_cluster = None
     master = FLAGS.master
 
-  session_config = tf.ConfigProto(allow_soft_placement=True)
+  session_config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
   # Uncomment the following line if you hope to monitor GPU RAM growth
   # session_config.gpu_options.allow_growth = True
 
