@@ -17,8 +17,8 @@ from copy import copy
 from collections import defaultdict as dd
 
 import absl.logging as _logging  # pylint: disable=unused-import
-#import tensorflow as tf
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
+#import tensorflow.compat.v1 as tf
 
 import sentencepiece as spm
 
@@ -499,7 +499,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
       d = d.repeat()
 
     d = d.apply(
-        tf.estimator.data.map_and_batch(
+        tf.compat.v1.estimator.data.map_and_batch(
             lambda record: _decode_record(record, name_to_features),
             batch_size=batch_size,
             drop_remainder=drop_remainder))
@@ -512,7 +512,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
 def get_model_fn(n_class):
   def model_fn(features, labels, mode, params):
     #### Training or Evaluation
-    is_training = (mode == tf.estimator.ModeKeys.TRAIN)
+    is_training = (mode == tf.compat.v1.estimator.ModeKeys.TRAIN)
 
     #### Get loss from inputs
     if FLAGS.is_regression:
@@ -531,7 +531,7 @@ def get_model_fn(n_class):
     scaffold_fn = model_utils.init_from_checkpoint(FLAGS)
 
     #### Evaluation mode
-    if mode == tf.estimator.ModeKeys.EVAL:
+    if mode == tf.compat.v1.estimator.ModeKeys.EVAL:
       assert FLAGS.num_hosts == 1
 
       def metric_fn(per_example_loss, label_ids, logits, is_real_example):
@@ -551,7 +551,7 @@ def get_model_fn(n_class):
       def regression_metric_fn(
           per_example_loss, label_ids, logits, is_real_example):
         loss = tf.metrics.mean(values=per_example_loss, weights=is_real_example)
-        pearsonr = tf.estimator.metrics.streaming_pearson_correlation(
+        pearsonr = tf.compat.v1.estimator.metrics.streaming_pearson_correlation(
             logits, label_ids, weights=is_real_example)
         return {'eval_loss': loss, 'eval_pearsonr': pearsonr}
 
@@ -567,20 +567,20 @@ def get_model_fn(n_class):
       metric_args = [per_example_loss, label_ids, logits, is_real_example]
 
       if FLAGS.use_tpu:
-        eval_spec = tf.estimator.tpu.TPUEstimatorSpec(
+        eval_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(
             mode=mode,
             loss=total_loss,
             eval_metrics=(metric_fn, metric_args),
             scaffold_fn=scaffold_fn)
       else:
-        eval_spec = tf.estimator.EstimatorSpec(
+        eval_spec = tf.compat.v1.estimator.EstimatorSpec(
             mode=mode,
             loss=total_loss,
             eval_metric_ops=metric_fn(*metric_args))
 
       return eval_spec
 
-    elif mode == tf.estimator.ModeKeys.PREDICT:
+    elif mode == tf.compat.v1.estimator.ModeKeys.PREDICT:
       label_ids = tf.reshape(features["label_ids"], [-1])
 
       predictions = {
@@ -590,10 +590,10 @@ def get_model_fn(n_class):
       }
 
       if FLAGS.use_tpu:
-        output_spec = tf.estimator.tpu.TPUEstimatorSpec(
+        output_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(
             mode=mode, predictions=predictions, scaffold_fn=scaffold_fn)
       else:
-        output_spec = tf.estimator.EstimatorSpec(
+        output_spec = tf.compat.v1.estimator.EstimatorSpec(
             mode=mode, predictions=predictions)
       return output_spec
 
@@ -622,11 +622,11 @@ def get_model_fn(n_class):
       else:
         host_call = None
 
-      train_spec = tf.estimator.tpu.TPUEstimatorSpec(
+      train_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(
           mode=mode, loss=total_loss, train_op=train_op, host_call=host_call,
           scaffold_fn=scaffold_fn)
     else:
-      train_spec = tf.estimator.EstimatorSpec(
+      train_spec = tf.compat.v1.estimator.EstimatorSpec(
           mode=mode, loss=total_loss, train_op=train_op)
 
     return train_spec
@@ -685,7 +685,7 @@ def main(_):
   # If TPU is not available, this will fall back to normal Estimator on CPU
   # or GPU.
   if FLAGS.use_tpu:
-    estimator = tf.estimator.tpu.TPUEstimator(
+    estimator = tf.compat.v1.estimator.tpu.TPUEstimator(
         use_tpu=FLAGS.use_tpu,
         model_fn=model_fn,
         config=run_config,
@@ -693,7 +693,7 @@ def main(_):
         predict_batch_size=FLAGS.predict_batch_size,
         eval_batch_size=FLAGS.eval_batch_size)
   else:
-    estimator = tf.estimator.Estimator(
+    estimator = tf.compat.v1.estimator.Estimator(
         model_fn=model_fn,
         config=run_config)
 
