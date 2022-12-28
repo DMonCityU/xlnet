@@ -247,13 +247,13 @@ class GLUEProcessor(DataProcessor):
 
       # there are some incomplete lines in QNLI
       if len(line) <= a_column:
-        tf.logging.warning('Incomplete line, ignored.')
+        tf.compat.v1.logging.warning('Incomplete line, ignored.')
         continue
       text_a = line[a_column]
 
       if b_column is not None:
         if len(line) <= b_column:
-          tf.logging.warning('Incomplete line, ignored.')
+          tf.compat.v1.logging.warning('Incomplete line, ignored.')
           continue
         text_b = line[b_column]
       else:
@@ -263,7 +263,7 @@ class GLUEProcessor(DataProcessor):
         label = self.get_labels()[0]
       else:
         if len(line) <= self.label_column:
-          tf.logging.warning('Incomplete line, ignored.')
+          tf.compat.v1.logging.warning('Incomplete line, ignored.')
           continue
         label = line[self.label_column]
       examples.append(
@@ -368,13 +368,13 @@ class StsbProcessor(GLUEProcessor):
 
       # there are some incomplete lines in QNLI
       if len(line) <= a_column:
-        tf.logging.warning('Incomplete line, ignored.')
+        tf.compat.v1.logging.warning('Incomplete line, ignored.')
         continue
       text_a = line[a_column]
 
       if b_column is not None:
         if len(line) <= b_column:
-          tf.logging.warning('Incomplete line, ignored.')
+          tf.compat.v1.logging.warning('Incomplete line, ignored.')
           continue
         text_b = line[b_column]
       else:
@@ -384,7 +384,7 @@ class StsbProcessor(GLUEProcessor):
         label = self.get_labels()[0]
       else:
         if len(line) <= self.label_column:
-          tf.logging.warning('Incomplete line, ignored.')
+          tf.compat.v1.logging.warning('Incomplete line, ignored.')
           continue
         label = float(line[self.label_column])
       examples.append(
@@ -400,10 +400,10 @@ def file_based_convert_examples_to_features(
 
   # do not create duplicated records
   if tf.gfile.Exists(output_file) and not FLAGS.overwrite_data:
-    tf.logging.info("Do not overwrite tfrecord {} exists.".format(output_file))
+    tf.compat.v1.logging.info("Do not overwrite tfrecord {} exists.".format(output_file))
     return
 
-  tf.logging.info("Create new tfrecord {}.".format(output_file))
+  tf.compat.v1.logging.info("Create new tfrecord {}.".format(output_file))
 
   writer = tf.python_io.TFRecordWriter(output_file)
 
@@ -412,7 +412,7 @@ def file_based_convert_examples_to_features(
 
   for (ex_index, example) in enumerate(examples):
     if ex_index % 10000 == 0:
-      tf.logging.info("Writing example {} of {}".format(ex_index,
+      tf.compat.v1.logging.info("Writing example {} of {}".format(ex_index,
                                                         len(examples)))
 
     feature = convert_single_example(ex_index, example, label_list,
@@ -457,7 +457,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
   if FLAGS.is_regression:
     name_to_features["label_ids"] = tf.FixedLenFeature([], tf.float32)
 
-  tf.logging.info("Input tfrecord file {}".format(input_file))
+  tf.compat.v1.logging.info("Input tfrecord file {}".format(input_file))
 
   def _decode_record(record, name_to_features):
     """Decodes a record to a TensorFlow example."""
@@ -487,7 +487,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
     d = tf.data.TFRecordDataset(input_file)
     # Shard the dataset to difference devices
     if input_context is not None:
-      tf.logging.info("Input pipeline id %d out of %d",
+      tf.compat.v1.logging.info("Input pipeline id %d out of %d",
           input_context.input_pipeline_id, input_context.num_replicas_in_sync)
       d = d.shard(input_context.num_input_pipelines,
                   input_context.input_pipeline_id)
@@ -525,7 +525,7 @@ def get_model_fn(n_class):
 
     #### Check model parameters
     num_params = sum([np.prod(v.shape) for v in tf.trainable_variables()])
-    tf.logging.info('#params: {}'.format(num_params))
+    tf.compat.v1.logging.info('#params: {}'.format(num_params))
 
     #### load pretrained models
     scaffold_fn = model_utils.init_from_checkpoint(FLAGS)
@@ -635,7 +635,7 @@ def get_model_fn(n_class):
 
 
 def main(_):
-  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
   #### Validate flags
   if FLAGS.save_steps is not None:
@@ -701,11 +701,11 @@ def main(_):
     train_file_base = "{}.len-{}.train.tf_record".format(
         spm_basename, FLAGS.max_seq_length)
     train_file = os.path.join(FLAGS.output_dir, train_file_base)
-    tf.logging.info("Use tfrecord file {}".format(train_file))
+    tf.compat.v1.logging.info("Use tfrecord file {}".format(train_file))
 
     train_examples = processor.get_train_examples(FLAGS.data_dir)
     np.random.shuffle(train_examples)
-    tf.logging.info("Num of train samples: {}".format(len(train_examples)))
+    tf.compat.v1.logging.info("Num of train samples: {}".format(len(train_examples)))
 
     file_based_convert_examples_to_features(
         train_examples, label_list, FLAGS.max_seq_length, tokenize_fn,
@@ -725,7 +725,7 @@ def main(_):
     else:
       eval_examples = processor.get_test_examples(FLAGS.data_dir)
 
-    tf.logging.info("Num of eval samples: {}".format(len(eval_examples)))
+    tf.compat.v1.logging.info("Num of eval samples: {}".format(len(eval_examples)))
 
   if FLAGS.do_eval:
     # TPU requires a fixed batch size for all batches, therefore the number
@@ -764,7 +764,7 @@ def main(_):
         ckpt_name = filename[:-6]
         cur_filename = join(FLAGS.model_dir, ckpt_name)
         global_step = int(cur_filename.split("-")[-1])
-        tf.logging.info("Add {} to eval list.".format(cur_filename))
+        tf.compat.v1.logging.info("Add {} to eval list.".format(cur_filename))
         steps_and_files.append([global_step, cur_filename])
     steps_and_files = sorted(steps_and_files, key=lambda x: x[0])
 
@@ -784,20 +784,20 @@ def main(_):
 
       eval_results.append(ret)
 
-      tf.logging.info("=" * 80)
+      tf.compat.v1.logging.info("=" * 80)
       log_str = "Eval result | "
       for key, val in sorted(ret.items(), key=lambda x: x[0]):
         log_str += "{} {} | ".format(key, val)
-      tf.logging.info(log_str)
+      tf.compat.v1.logging.info(log_str)
 
     key_name = "eval_pearsonr" if FLAGS.is_regression else "eval_accuracy"
     eval_results.sort(key=lambda x: x[key_name], reverse=True)
 
-    tf.logging.info("=" * 80)
+    tf.compat.v1.logging.info("=" * 80)
     log_str = "Best result | "
     for key, val in sorted(eval_results[0].items(), key=lambda x: x[0]):
       log_str += "{} {} | ".format(key, val)
-    tf.logging.info(log_str)
+    tf.compat.v1.logging.info(log_str)
 
   if FLAGS.do_predict:
     eval_file_base = "{}.len-{}.{}.predict.tf_record".format(
@@ -824,7 +824,7 @@ def main(_):
           yield_single_examples=True,
           checkpoint_path=FLAGS.predict_ckpt)):
         if pred_cnt % 1000 == 0:
-          tf.logging.info("Predicting submission for example: {}".format(
+          tf.compat.v1.logging.info("Predicting submission for example: {}".format(
               pred_cnt))
 
         logits = [float(x) for x in result["logits"].flat]
