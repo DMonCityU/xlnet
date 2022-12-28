@@ -41,7 +41,7 @@ def configure_tpu(FLAGS):
                     strategy.num_replicas_in_sync)
 
   per_host_input = tf.compat.v1.estimator.tpu.InputPipelineConfig.PER_HOST_V2
-  run_config = tf.estimator.tpu.RunConfig(
+  run_config = tf.compat.v1.estimator.tpu.RunConfig(
       master=master,
       model_dir=FLAGS.model_dir,
       session_config=session_config,
