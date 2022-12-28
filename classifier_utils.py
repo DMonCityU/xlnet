@@ -3,7 +3,8 @@ from absl import flags
 import re
 import numpy as np
 
-import tensorflow as tf
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from data_utils import SEP_ID, CLS_ID
 
 FLAGS = flags.FLAGS
