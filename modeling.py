@@ -96,11 +96,13 @@ def post_attention(h, attn_vec, d_model, n_head, d_head, dropout, is_training,
 
   attn_out = tf.compat.v1.layers.dropout(attn_out, dropout, training=is_training)
   if residual:
-    output = tf.compat.v1.layers.layer_norm(attn_out + h, begin_norm_axis=-1,
-                                          scope='LayerNorm')
+    output = tf.keras.layers.LayerNormalization(attn_out + h, axis = -1)
+    #output = tf.compat.v1.layers.layer_norm(attn_out + h, begin_norm_axis=-1,
+    #                                      scope='LayerNorm')
   else:
-    output = tf.compat.v1.layers.layer_norm(attn_out, begin_norm_axis=-1,
-                                          scope='LayerNorm')
+    output = tf.keras.layers.LayerNormalization(attn_out, axis = -1)
+    # output = tf.compat.v1.layers.layer_norm(attn_out, begin_norm_axis=-1,
+    #                                       scope='LayerNorm')
 
   return output
 
